@@ -1,3 +1,3 @@
-module github.com/z11i/onesecmail
+module github.com/sadovojav/onesecmail
 
 go 1.14
