@@ -10,12 +10,12 @@ package main
 import (
     "fmt"
     
-    "github.com/z11i/onesecmail"
+    "github.com/sadovojav/onesecmail"
 )
 
 func main() {
     // Generate a random mailbox name
-    // The domain name can be either 1secmail.org, 1secmail.com, or 1secmail.net
+    // The domain name can be either 1secmail.com, 1secmail.org, 1secmail.net, bheps.com, dcctb.com, kzccv.com, qiott.com, wuuvo.com
     mailboxName := "randomname@1secmail.org"
     
     // Send emails to the generated email
