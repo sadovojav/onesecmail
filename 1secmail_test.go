@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/z11i/onesecmail"
+	"github.com/sadovojav/onesecmail"
 )
 
 type ClientMock struct {
