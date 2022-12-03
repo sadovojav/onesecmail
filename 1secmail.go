@@ -105,7 +105,7 @@ func (m Mailbox) ReadMessage(messageID int) (*Mail, error) {
 	defer resp.Body.Close()
 
 	var mail *Mail
-	if err := json.NewDecoder(resp.Body).Decode(mail); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&mail); err != nil {
 		return nil, fmt.Errorf("decode JSON failed: %w", err)
 	}
 
