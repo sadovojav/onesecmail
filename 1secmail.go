@@ -3,6 +3,8 @@ package onesecmail
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"math/rand"
 	"net/http"
 )
 
@@ -14,10 +16,11 @@ const (
 	getMessages mailboxAction = iota
 	readMessage
 	download
+	getDomainList
 )
 
 func (m mailboxAction) String() string {
-	return [...]string{"getMessages", "readMessage", "download"}[m]
+	return [...]string{"getMessages", "readMessage", "download", "getDomainList"}[m]
 }
 
 // Mail represents a mail in a 1secmail inbox.
@@ -64,12 +67,37 @@ func NewMailbox(login, domain string, httpClient HTTPClient) *Mailbox {
 	if httpClient == nil {
 		httpClient = &http.Client{}
 	}
-	return &Mailbox{
+	mail := &Mailbox{
 		BaseURL: apiBase,
 		client:  httpClient,
-		Domain:  domain,
 		Login:   login,
 	}
+
+	domains, err := mail.GetDomainList()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	if domain == "" {
+		mail.Domain = domains[rand.Intn(len(domains))]
+	} else {
+		if !contains(domains, domain) {
+			log.Panic("does not valid domain")
+		}
+
+		mail.Domain = domain
+	}
+
+	return mail
+}
+
+func contains(elems []string, v string) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }
 
 // CheckInbox checks the inbox of a mailbox, and returns a list of mails.
@@ -110,6 +138,23 @@ func (m Mailbox) ReadMessage(messageID int) (*Mail, error) {
 	}
 
 	return mail, nil
+}
+
+// GetDomainList retrieves a list of currently active handling domains
+func (m Mailbox) GetDomainList() ([]string, error) {
+	req := constructRequest("GET", m.BaseURL, getDomainList, map[string]string{})
+	resp, err := m.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("read messsage failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	var domains []string
+	if err := json.NewDecoder(resp.Body).Decode(&domains); err != nil {
+		return nil, fmt.Errorf("decode JSON failed: %w", err)
+	}
+
+	return domains, nil
 }
 
 func constructRequest(method, baseURL string, action mailboxAction, args map[string]string) *http.Request {
